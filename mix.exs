@@ -41,7 +41,9 @@ defmodule Exqlite.MixProject do
       {:elixir_make, "~> 0.6", runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:temp, "~> 0.4", only: [:dev, :test]},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+            # Dev/Test
+      {:benchee, "~> 1.1", only: [:dev]},
     ]
   end
 

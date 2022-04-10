@@ -148,6 +148,36 @@ defmodule Exqlite.Sqlite3 do
     end
   end
 
+  def old_fetch_all(conn, statement, chunk_size) do
+    old_fetch_all(conn, statement, chunk_size, [])
+  end
+
+  def old_fetch_all(conn, statement) do
+    # Should this be done in the NIF? It can be _much_ faster to build a list
+    # there, but at the expense that it could block other dirty nifs from
+    # getting work done.
+    #
+    # For now this just works
+    chunk_size = Application.get_env(:exqlite, :default_chunk_size, 50)
+    old_fetch_all(conn, statement, chunk_size, [])
+  end
+
+  defp old_fetch_all(conn, statement, chunk_size, accum) do
+    case multi_step(conn, statement, chunk_size) do
+      {:done, rows} ->
+        {:ok, accum ++ rows}
+
+      {:rows, rows} ->
+        old_fetch_all(conn, statement, chunk_size, accum ++ rows)
+
+      {:error, reason} ->
+        {:error, reason}
+
+      :busy ->
+        {:error, "Database busy"}
+    end
+  end
+
   @doc """
   Serialize the contents of the database to a binary.
   """
